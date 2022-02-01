@@ -22,9 +22,21 @@ def start(update:Update, context:CallbackContext):
 def verify_answer(update: Update, context: CallbackContext):
     f = open("setup.txt", "r")
     random_word = f.readline()
-    print("palavra é: {}".format(random_word))
-    update.message.reply_text('blablabla')
-
+    input_wrd = update.message.text.upper()
+    if update.message.text.upper()==random_word:
+        update.message.reply_text(input_wrd)
+    elif len(input_wrd) != 5:
+        update.message.reply_text('DIGITE UMA PALAVRA COM 5 LETRAS')
+    else:
+        tmp_wrd = []
+        for i in range(5):
+            if random_word[i]==input_wrd[i]:
+                tmp_wrd.append(input_wrd[i])
+            elif input_wrd[i] in random_word:
+                tmp_wrd.append('**__{}__**'.format(input_wrd[i]))
+            else:
+                tmp_wrd.append('_')
+        update.message.reply_text(' '.join(tmp_wrd))
 
 def choose_word():
     n = randint(0, 999)
