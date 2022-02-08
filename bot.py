@@ -1,12 +1,14 @@
 import json
+import requests
 from email.message import Message
 from json.tool import main
 from random import randint
+from tabnanny import check
 from tkinter.tix import MAIN
 from datetime import datetime, timedelta
  
 from telegram import Bot, Update
-from telegram.ext import (CallbackContext, CommandHandler, Dispatcher, Filters,
+from telegram.ext import (CallbackContext, CommandHandler, Filters,
                           MessageHandler, Updater)
 
 
@@ -23,20 +25,30 @@ def verify_answer(update: Update, context: CallbackContext):
     f = open("setup.txt", "r")
     random_word = f.readline()
     input_wrd = update.message.text.upper()
+    valid_word = check_word(input_wrd)
     if update.message.text.upper()==random_word:
         update.message.reply_text(input_wrd)
     elif len(input_wrd) != 5:
         update.message.reply_text('DIGITE UMA PALAVRA COM 5 LETRAS')
+    elif not valid_word:
+        update.message.reply_text('DIGITE UMA PALAVRA VÁLIDA') 
     else:
         tmp_wrd = []
         for i in range(5):
             if random_word[i]==input_wrd[i]:
                 tmp_wrd.append(input_wrd[i])
             elif input_wrd[i] in random_word:
-                tmp_wrd.append('**__{}__**'.format(input_wrd[i]))
+                tmp_wrd.append('**{}**'.format(input_wrd[i]))
             else:
                 tmp_wrd.append('_')
         update.message.reply_text(' '.join(tmp_wrd))
+
+def check_word(word):
+    r = requests.get('https://papalavras-server.herokuapp.com/words/verify/{}'.format(word.capitalize()))
+    if r.status_code == 200:
+        return True
+    else:
+        return False
 
 def choose_word():
     n = randint(0, 999)
